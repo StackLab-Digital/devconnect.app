@@ -1,0 +1,80 @@
+<%# Partial para o cabeçalho da discussão %>
+<%# Recebe `discussion` como local %>
+
+<div id="discussion_header" class="mb-8 mt-8 flex justify-between items-start gap-x-4">
+  <%# Coluna Esquerda: Título, Badges, Autor %>
+  <div>
+    <%# Título e Badges %>
+    <div class="flex items-center gap-x-3 mb-2">
+      <h1 class="text-3xl md:text-4xl font-bold font-geist text-gray-800 dark:text-neutral-200"><%= discussion.title %></h1>
+      <%# Pinned/Closed Status Badges %>
+      <% if discussion.pinned? %>
+        <span class="inline-flex items-center gap-x-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full dark:bg-yellow-500/10 dark:text-yellow-500 py-0.5 px-2" title="Fixado">
+          <%= lucide_icon('pin', class: "size-3") %> Fixado
+        </span>
+      <% end %>
+      <% if discussion.closed? %>
+        <span class="inline-flex items-center gap-x-1 text-xs font-medium bg-red-100 text-red-800 rounded-full dark:bg-red-500/10 dark:text-red-500 py-0.5 px-2" title="Fechado">
+          <%= lucide_icon('lock', class: "size-3") %> Fechado
+        </span>
+      <% end %>
+    </div>
+
+    <%# Informações do Autor e Timestamp %>
+    <div class="flex items-center gap-x-3 text-sm text-gray-600 dark:text-neutral-400">
+      <%# Avatar %>
+      <% if discussion.user.avatar.attached? %>
+        <img class="inline-block size-7 rounded-full object-cover" src="<%= url_for(discussion.user.avatar) %>" alt="<%= discussion.user.name %> avatar">
+      <% else %>
+        <div class="inline-flex items-center justify-center size-7 rounded-full bg-lime-500 text-white text-xs font-semibold">
+          <%= user_initials(discussion.user) %>
+        </div>
+      <% end %>
+      <span>Por <%= discussion.user.name %></span>
+      <span>•</span>
+      <span title="<%= discussion.created_at.strftime('%d %b %Y, %H:%M') %>"><%= time_ago_in_words(discussion.created_at) %> atrás</span>
+    </div>
+  </div> <%# Fim Coluna Esquerda %>
+
+  <%# Coluna Direita: Botões de Ação (Editar/Excluir/Fechar/Reabrir) %>
+  <div class="flex-shrink-0"> <%# Remove controller daqui %>
+    <% if user_signed_in? && current_user == discussion.user %>
+      <div class="flex gap-x-2">
+        <%# Botão Reabrir (se fechado) %>
+        <% if discussion.closed? %>
+          <%= button_to reopen_discussion_path(discussion),
+                        method: :patch,
+                        class: "py-1.5 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-300 bg-white text-gray-700 shadow-sm hover:bg-gray-100 dark:bg-neutral-800 dark:border-neutral-600 dark:text-neutral-300 dark:hover:bg-neutral-700" do %>
+            <%= lucide_icon('unlock', class: "size-3.5") %>
+            Reabrir
+          <% end %>
+        <% else %>
+          <%# Botão Fechar (Trigga Modal específico) %>
+          <button type="button" 
+                  data-action="click->modal#openCloseModal" <%# Ação específica %>
+                  class="py-1.5 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-orange-200 bg-white text-orange-700 shadow-sm hover:bg-orange-50 dark:bg-neutral-900 dark:border-orange-700 dark:text-orange-500 dark:hover:bg-orange-800/30">
+            <%= lucide_icon('lock', class: "size-3.5") %>
+            Fechar
+          </button>
+        <% end %>
+
+        <%# Botão Editar %>
+        <%= link_to edit_discussion_path(discussion),
+                    class: "py-1.5 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-blue-200 bg-white text-blue-700 shadow-sm hover:bg-blue-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-blue-700 dark:text-blue-500 dark:hover:bg-blue-800/30" do %>
+          <%= lucide_icon('pencil', class: "size-3.5") %>
+          Editar
+        <% end %>
+
+        <%# Botão Excluir (agora abre o modal específico) %>
+        <% if user_signed_in? && current_user == discussion.user %>
+          <button type="button" 
+                  data-action="click->modal#openDeleteModal" <%# Ação específica %>
+                  class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-red-500 bg-transparent text-red-500 shadow-sm hover:bg-red-50 disabled:opacity-50 disabled:pointer-events-none dark:border-red-700 dark:text-red-400 dark:hover:bg-red-800/30">
+            <%= lucide_icon('trash-2', class: 'flex-shrink-0 size-4') %>
+            Excluir
+          </button>
+        <% end %>
+      </div>
+    <% end %>
+  </div> <%# Fim Coluna Direita %>
+</div> <%# Fim Header discussion_header %> 
