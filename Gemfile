@@ -67,4 +67,4 @@ end
 
 gem "devise", "~> 4.9"
 
-gem "lucide-rails", "~> 0.5.1"
+gem "lucide-rails", "~> 0.7.1"
